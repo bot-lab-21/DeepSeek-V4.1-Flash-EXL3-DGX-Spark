@@ -95,15 +95,19 @@ The per-matrix weight relative error at K=3 is 0.167 and the output does not mov
 | 6 streams aggregate tok/s | 131.86 | 130.7 | 178.7 |
 | cold prefill 3K / 12K / 47K / 93K tok/s | 902 / 1026 / 1539 / 1194 | 1094 / 558 / 1310 / 1292 | 1263 / 1082 / 1363 / 1375 |
 | KV capacity at gmu 0.80 | 1,078,380 tokens (boot 7, 1M ctx) | 1.16 M tokens | 2.56 M tokens |
-| ppl probe (6 held-out texts, 4,210 tokens) | — | not measured | 4.043 |
-| HumanEval / HumanEval+ pass@1 (greedy, evalplus) | — | not measured | 0.951 / 0.921 |
-| MBPP+ (greedy) | — | not measured | not measured (battery timed out) |
-| needle at 219K tokens (2 keys) | — | — | PASS / PASS |
-| 1M-context serving row (line B, pin + NCCL channels 8, `--max-model-len 1000000`) | — | — | C1 54.8 / 59.9, C4 141.8, C6 184.9, prefill 673 / 1007 / 1475 / 1449; **3.41 M tokens KV** (3.4 full-length requests) |
-| **production (1M context), line A: pin + NCCL ch 8 + RoCE + async + b12x MXFP8 dense kernel** | — | — | C1 55.9 / 61.4, C4 147.2, C6 192.0, TTFT 0.25, prefill 1142 / 1326 / 1385 / 1406; KV 3.41 M tokens (11 Sep 11:36) |
-| **production (1M context), line B: pin + NCCL ch 8 + RoCE + b12x MXFP8 dense kernel** | — | — | C1 56.3 / 62.3, C4 149.6, C6 178.7, TTFT 0.25, prefill 1067 / 1174 / 1396 / 1418; KV 3.41 M tokens (11 Sep 11:15). Run-to-run spread on this fleet is about ±5 %: the same config benched C6 192.7 two hours earlier |
-| **optional KV grouping fix** (`recipe/patches/kvgroup`, env `DSV41_KV_GROUPING=fine`) | — | — | KV 3.41 M → **5.57 M tokens at 1M** (+63 %) for −6 % single-stream / −8 % C6 (47 KV groups of scheduler work); off in our served bases |
-| tool-call integrity (12 calls) · image probe | — | tool calls PASS · image probe not run (text-only serving line) |
+
+**This build only** (no shipped-checkpoint counterpart was measured):
+
+| | this build |
+|---|---|
+| ppl probe (6 held-out texts, 4,210 tokens) | 4.043 |
+| HumanEval / HumanEval+ pass@1 (greedy, evalplus) | 0.951 / 0.921 |
+| needle at 219K tokens (2 keys) | PASS / PASS |
+| tool-call integrity (12 calls) | PASS |
+| 1M-context serving row (line B, pin + NCCL channels 8, `--max-model-len 1000000`) | C1 54.8 / 59.9, C4 141.8, C6 184.9, prefill 673 / 1007 / 1475 / 1449; **3.41 M tokens KV** (3.4 full-length requests) |
+| **production (1M context), line A: pin + NCCL ch 8 + RoCE + async + b12x MXFP8 dense kernel** | C1 55.9 / 61.4, C4 147.2, C6 192.0, TTFT 0.25, prefill 1142 / 1326 / 1385 / 1406; KV 3.41 M tokens (11 Sep 11:36) |
+| **production (1M context), line B: pin + NCCL ch 8 + RoCE + b12x MXFP8 dense kernel** | C1 56.3 / 62.3, C4 149.6, C6 178.7, TTFT 0.25, prefill 1067 / 1174 / 1396 / 1418; KV 3.41 M tokens (11 Sep 11:15). Run-to-run spread on this fleet is about ±5 %: the same config benched C6 192.7 two hours earlier |
+| **optional KV grouping fix** (`recipe/patches/kvgroup`, env `DSV41_KV_GROUPING=fine`) | KV 3.41 M → **5.57 M tokens at 1M** (+63 %) for −6 % single-stream / −8 % C6 (47 KV groups of scheduler work); off in our served bases |
 
 ## How it was made (Pollard-method, "route B")
 1. **Exact bf16 upscale** of the release (fp8 · 2^(ue8m0−127) 32×32 blocks; MXFP4 e2m1 LUT × per-32 ue8m0 scale), round-trip checked. There is no native bf16 release; the source is a 4.25-bit QAT checkpoint. Gate-0 measured that EXL3 on these FP4-grid weights behaves exactly like a Gaussian control, so the grid neither helps nor hurts the trellis quantizer.

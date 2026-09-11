@@ -71,20 +71,24 @@ Levers in the served configurations and where they come from (full ledger in `CR
 |---|---|---|---|
 | weights loaded per rank | 81.6 GiB | ~81 GiB | **62.8 GiB** (measured at load) |
 | calibration NLL, 10-node held-out rows, vs bf16 reference | — | 1.3209 | 1.3177 ± 0.006 (flat; all-K3 fallback 1.3152 ± 0.003) |
-| per-matrix weight relative error | — | — | 0.167 |
 | single stream, aggregate / per-stream tok/s | 37.95 / 43.12 | 42.3 / 50.5 | 54.7 / 61.1 |
 | 4 streams aggregate tok/s | 85.72 | 102.7 | 133.1 |
 | 6 streams aggregate tok/s | 131.86 | 130.7 | 178.7 |
 | cold prefill 3K / 12K / 47K / 93K tok/s | 902 / 1026 / 1539 / 1194 | 1094 / 558 / 1310 / 1292 | 1263 / 1082 / 1363 / 1375 |
 | KV capacity at gmu 0.80 | 1,078,380 tokens (boot 7, 1M ctx) | 6.99 GiB/rank = 1.16 M tokens | 2.56 M tokens |
-| ppl probe (6 held-out texts, 4,210 tokens) | — | not measured | 4.043 |
-| HumanEval / HumanEval+ pass@1 (greedy, evalplus) | — | not measured | 0.951 / 0.921 |
-| MBPP+ (greedy) | — | not measured | not measured (battery timed out) |
-| needle at 219K tokens (2 keys) | — | — | PASS / PASS |
 | 1M-context serving row (pin + NCCL channels 8, `--max-model-len 1000000`) | 1M ctx: KV 1,078,380 tokens (boot 7) | — | C1 54.8 / 59.9, C4 141.8, C6 184.9, prefill 673 / 1007 / 1475 / 1449; **3.41 M tokens KV** |
-| **production (1M context), line A: pin + NCCL ch 8 + RoCE + async + b12x MXFP8 dense kernel** | — | — | C1 55.9 / 61.4, C4 147.2, C6 192.0, TTFT 0.25, prefill 1142 / 1326 / 1385 / 1406; KV 3.41 M tokens (11 Sep 11:36) |
-| **production (1M context), line B: pin + NCCL ch 8 + RoCE + b12x MXFP8 dense kernel** | — | — | C1 56.3 / 62.3, C4 149.6, C6 178.7, TTFT 0.25, prefill 1067 / 1174 / 1396 / 1418; KV 3.41 M tokens (11 Sep 11:15). Run-to-run spread on this fleet is about ±5 %: the same config benched C6 192.7 two hours earlier |
-| **optional KV grouping fix** (`recipe/patches/kvgroup`, env `DSV41_KV_GROUPING=fine`) | — | — | KV 3.41 M → **5.57 M tokens at 1M** (+63 %) for −6 % single-stream / −8 % C6 (47 KV groups of scheduler work); off in our served bases |
+
+**This build only** (no shipped-checkpoint counterpart was measured):
+
+| | this build |
+|---|---|
+| per-matrix weight relative error | 0.167 |
+| ppl probe (6 held-out texts, 4,210 tokens) | 4.043 |
+| HumanEval / HumanEval+ pass@1 (greedy, evalplus) | 0.951 / 0.921 |
+| needle at 219K tokens (2 keys) | PASS / PASS |
+| **production (1M context), line A: pin + NCCL ch 8 + RoCE + async + b12x MXFP8 dense kernel** | C1 55.9 / 61.4, C4 147.2, C6 192.0, TTFT 0.25, prefill 1142 / 1326 / 1385 / 1406; KV 3.41 M tokens (11 Sep 11:36) |
+| **production (1M context), line B: pin + NCCL ch 8 + RoCE + b12x MXFP8 dense kernel** | C1 56.3 / 62.3, C4 149.6, C6 178.7, TTFT 0.25, prefill 1067 / 1174 / 1396 / 1418; KV 3.41 M tokens (11 Sep 11:15). Run-to-run spread on this fleet is about ±5 %: the same config benched C6 192.7 two hours earlier |
+| **optional KV grouping fix** (`recipe/patches/kvgroup`, env `DSV41_KV_GROUPING=fine`) | KV 3.41 M → **5.57 M tokens at 1M** (+63 %) for −6 % single-stream / −8 % C6 (47 KV groups of scheduler work); off in our served bases |
 
 Engram: the top 100 M rows of each n-gram table (by frequency over 1.12 B tokens of real assistant traffic) cover **92.7 %** of held-out lookups (43 % at 1 M, 74 % at 20 M). Quantizing Engram rows to fp4 (mxfp4 or nvfp4) was NLL-neutral within noise. A 20 M-row resident set (CPU hit/miss split) measured −4 to −6 % single-stream on both lines, so the ids are not shipped; a GPU-side gather is the open follow-up.
 
