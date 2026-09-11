@@ -13,7 +13,7 @@ Weights: **[bot-lab-21/DeepSeek-V4.1-Flash-EXL3-3.5bpw-Pollard](https://huggingf
 This is not our model, our serving stack, or our quantizer. It is our measurements and the glue. See **Credits**.
 
 <!-- BEST-SERVING-START -->
-## Best serving configuration so far (auto-updated 2026-09-11 01:37 Pacific)
+## Best serving configuration so far (auto-updated 2026-09-11 01:40 Pacific)
 Line A, row `exl3-ROCE-A` (accepted rung: ROCE=1). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8, b12x RoCE one-shot all-reduce = 1.
 
 | | best so far |
@@ -34,6 +34,7 @@ Tuning ladder (accept = +3 % single-stream or 6-stream aggregate with ≤5 % pre
 | B | exl3-G0-B-base0116 | base | 61.2 | 178.6 | 1323 | base |
 | B | exl3-CH8-B | NCCL_CH=8 | 62.2 | 199.0 | 1423 | ACCEPT |
 | B | exl3-SERVE1M-B | MAXLEN=1000000 SEQS=8 | 59.9 | 184.9 | 1475 | ACCEPT |
+| B | exl3-G0-B | base | 61.5 | 185.6 | 1417 | base |
 | B | exl3-ET64-B | ENGRAM_THREADS=64 | 62.22 | 176.68 | 1480.5 | reject |
 | B | exl3-HOT-B | HOT_DIR=/mnt/glm52/dsv41engram/hot90 HOT_ROWS=20000000 | 59.9 | 188.0 | 1424 | reject |
 <!-- BEST-SERVING-END -->
