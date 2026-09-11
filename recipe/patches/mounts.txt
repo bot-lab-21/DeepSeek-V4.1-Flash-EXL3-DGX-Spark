@@ -7,3 +7,4 @@ model_state.py models/deepseek_v4_1/nvidia/model_state.py
 sparse_attn_indexer.py model_executor/layers/sparse_attn_indexer.py
 exl3_config.py ../cuda_exl3/config.py
 exl3_moe.py ../cuda_exl3/moe.py
+roce_cuda_communicator.py distributed/device_communicators/cuda_communicator.py

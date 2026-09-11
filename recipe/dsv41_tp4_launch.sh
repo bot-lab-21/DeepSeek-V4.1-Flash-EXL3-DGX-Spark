@@ -4,7 +4,7 @@
 # Every node has a LOCAL copy of the checkpoint at /mnt/glm52/hub/DeepSeek-V4.1-Flash (no NFS); patches in ~/patches/dsv41-boot3.
 # Fabric: enp1s0f1np1 / rocep1s0f1 / GID 3 / TC 106 (our GLM-5.3 recipes), RoCE range FABRIC_IP/24.
 # Knobs (export before running, SAME on all four): IMAGE (vllm-dsv41:overlay5) EXP_NAME GMU (0.80) MAXLEN (300000) SEQS (8)
-#   MAX_BATCHED (8192) EAGER (0) CUDAGRAPH_MODE (FULL_AND_PIECEWISE) CG_SIZES SPEC (dspark) SPEC_K (5) SPEC_ADAPT (false)
+#   EXTRA_ENV (extra `-e K=V` docker env args, e.g. "-e CUDA_EXL3_MOE_BLOCK_M=16") MAX_BATCHED (8192) EAGER (0) CUDAGRAPH_MODE (FULL_AND_PIECEWISE) CG_SIZES SPEC (dspark) SPEC_K (5) SPEC_ADAPT (false)
 #   ENGRAM_DISK (1) ENGRAM_THREADS (32) ENGRAM_CHUNK (16) TEXT_ONLY (0) THINKING (false) PARSERS (1) RUST_FE (0) VLLM_EXTRA NCCL_EXTRA
 set -euo pipefail
 NODE_RANK="${1:?usage: dsv41_tp4_launch.sh <0|1|2|3>}"
@@ -75,7 +75,7 @@ docker run --gpus all -d --name "$NAME" --restart no \
   -e NCCL_IB_ROCE_VERSION_NUM=2 -e NCCL_IB_ADDR_FAMILY=AF_INET -e NCCL_IB_ADDR_RANGE=FABRIC_IP/24 \
   -e NCCL_SOCKET_IFNAME=$IF -e GLOO_SOCKET_IFNAME=$IF -e TP_SOCKET_IFNAME=$IF -e MN_IF_NAME=$IF \
   -e NCCL_NVLS_ENABLE=0 -e NCCL_CROSS_NIC=0 -e NCCL_IB_MERGE_NICS=0 -e NCCL_CUMEM_ENABLE=0 -e NCCL_IGNORE_CPU_AFFINITY=1 -e NCCL_DEBUG=WARN -e TORCH_NCCL_ASYNC_ERROR_HANDLING=1 \
-  ${NCCL_CH:+-e NCCL_MIN_NCHANNELS=$NCCL_CH -e NCCL_MAX_NCHANNELS=$NCCL_CH} ${ROCE:+-e VLLM_ENABLE_ROCE_ALLREDUCE=$ROCE -e VLLM_ROCE_ALLREDUCE_MAX_SIZE=${ROCE_MAX:-2MB}} $NCCL_EXTRA \
+  ${NCCL_CH:+-e NCCL_MIN_NCHANNELS=$NCCL_CH -e NCCL_MAX_NCHANNELS=$NCCL_CH} ${EXTRA_ENV:-} ${MOE_BLOCK_M:+-e CUDA_EXL3_MOE_BLOCK_M=$MOE_BLOCK_M} ${NCCL_ALGO:+-e NCCL_ALGO=$NCCL_ALGO} ${NCCL_PROTO:+-e NCCL_PROTO=$NCCL_PROTO} ${NCCL_NTHREADS:+-e NCCL_NTHREADS=$NCCL_NTHREADS} ${ROCE:+-e VLLM_ENABLE_ROCE_ALLREDUCE=$ROCE -e VLLM_ROCE_ALLREDUCE_MAX_SIZE=${ROCE_MAX:-2MB}} $NCCL_EXTRA \
   --entrypoint vllm "$IMAGE" serve "/models/$MODEL_DIR" --served-model-name deepseek-v4.1-flash ${SERVED_ALIAS:-} --host 0.0.0.0 --port $PORT \
   --tensor-parallel-size 4 --distributed-executor-backend mp --nnodes 4 --node-rank $NODE_RANK --master-addr $HEAD_IP --master-port $MPORT $HEADLESS \
   --gpu-memory-utilization "$GMU" ${KV_BYTES:+--kv-cache-memory-bytes $KV_BYTES} --max-model-len "$MAXLEN" --max-num-seqs "$SEQS" --max-num-batched-tokens "$MAX_BATCHED" \

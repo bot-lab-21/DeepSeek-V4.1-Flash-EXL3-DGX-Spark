@@ -799,8 +799,9 @@ class DiskEngramTable:
         n = int(local.numel())
         if n == 0:
             return
-        w = torch.empty((n, self.dim), dtype=torch.uint8).pin_memory()
-        sc = torch.empty((n, self.sb), dtype=torch.uint8).pin_memory()
+        # explicit CPU: vLLM's worker runs with the default device set to CUDA, and only dense CPU tensors can be pinned
+        w = torch.empty((n, self.dim), dtype=torch.uint8, device="cpu").pin_memory()
+        sc = torch.empty((n, self.sb), dtype=torch.uint8, device="cpu").pin_memory()
         t0 = _kai_time.time()
         _kai_parallel_read(self.read_jobs(local.tolist(), w, sc))
         self.hot_ids, self.hot_w, self.hot_s = local, w, sc

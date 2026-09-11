@@ -84,6 +84,8 @@ The per-matrix weight relative error at K=3 is 0.167 and the output does not mov
 | MBPP+ (greedy) | — | TBD | pending (battery timed out mid-run; re-running) |
 | needle at 219K tokens (2 keys) | — | — | PASS / PASS |
 | 1M-context serving row (line B, pin + NCCL channels 8, `--max-model-len 1000000`) | — | — | C1 54.8 / 59.9, C4 141.8, C6 184.9, prefill 673 / 1007 / 1475 / 1449; **3.41 M tokens KV** (3.4 full-length requests) |
+| **production (1M context), line A: pin + NCCL ch 8 + RoCE + async + 16K batch** | — | — | C1 58.4 / 65.1, C4 148.4, C6 183.1, TTFT 0.26, prefill 1312 / 1412 / 1411 / 1391; KV 2.99 M tokens |
+| **production (1M context), line B: pin + NCCL ch 8 + RoCE** | — | — | C1 55.5 / 61.8, C4 149.4, C6 192.7, TTFT 0.25, prefill 1343 / 1176 / 1459 / 1463; KV 3.41 M tokens |
 | needle 300K, tool-call integrity, image probe | TBD | TBD |
 
 ## How it was made (Pollard-method, "route B")

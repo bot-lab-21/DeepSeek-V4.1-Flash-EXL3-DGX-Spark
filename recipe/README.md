@@ -30,6 +30,18 @@ Everything here is the actual tooling we run, with site identifiers replaced by 
 | `images/Dockerfile.overlay6/7/8` | vehicle image chain: tonyd2wild overlay5 → + RoCE/PCIe one-shot all-reduce shim (b12x) → + cuda-exl3 with the V4.1 overlay → + spin-wait fix |
 | `roce_port/*.diff`, `roce_ar_*.{py,sh}` | the vLLM shim diffs for the b12x one-shot collectives and the 2-node bit-exactness / latency test |
 
+
+## Tuning chain (v2) and helpers
+| file | role |
+|---|---|
+| `dsv41_ladder3.sh` → `dsv41_gate_run_v2.sh` → `dsv41_boot_tp4_v2.sh` → `dsv41_node_prep_v2.sh` | the fixed ladder (row-scoped smoke check), lever rows (ROCE, CH8, ET64, K7, ASYNC, HOT, SERVE1M, MAXB16K, FLUSH8, NCCLTREE, NTH256, RUST, BLOCKM16/32, ADAPT), boot with knob passthrough, prep with the GPU slow-state probe **and** the clock-latch burn gate (`gputools/gpuburn.py`) |
+| `ops/stack_next.sh`, `ops/ladder_relaunch.sh`, `ops/boot_prod.sh` | hand-off between ladders (re-derive verdict, cross-apply the other line's wins, re-measure the base), relaunch by PID tree, boot a line on its accepted base |
+| `ops/accepted-{A,B}.example.txt` | the accepted bases we serve (pinned KV, GMU guard, MemFree floor, NCCL channels 8, RoCE; A adds async + 16K batch) |
+| `ops/publish_best.py`, `ops/publish_best_loop.sh` | rebuild the "best serving configuration" block from the bench rows and push the card |
+| `ops/TUNING_BACKLOG.md` | every lever tried or queued, with source and credit |
+| `patches/roce_cuda_communicator.py` | vLLM CUDA communicator with the b12x RoCE shim (fixes the unbound-list bug in the backend logger) |
+| `dsv41_quality_gate.sh` | ppl probe, needle, tool-call, evalplus HumanEval+/MBPP+ battery |
+
 ## Boot in one line
 
 ```
