@@ -52,6 +52,7 @@ Tuning ladder (accept = +3 % single-stream or 6-stream aggregate with ≤5 % pre
 | HumanEval / HumanEval+ pass@1 (greedy, evalplus) | — | TBD (pending) | 0.951 / 0.921 |
 | MBPP+ (greedy) | — | TBD | pending |
 | needle at 219K tokens (2 keys) | — | — | PASS / PASS |
+| 1M-context serving row (pin + NCCL channels 8, `--max-model-len 1000000`) | 1M ctx: KV 1,078,380 tokens (boot 7) | — | C1 56.4 / 59.9, C6 184.9, prefill@47K 1475; **3.41 M tokens KV** |
 
 Engram: the top 100 M rows of each n-gram table (by frequency over 1.12 B tokens of real assistant traffic) cover **92.7 %** of held-out lookups (43 % at 1 M, 74 % at 20 M). Quantizing Engram rows to fp4 (mxfp4 or nvfp4) was NLL-neutral within noise. The ids are published with the weights; the serving patch can keep them resident.
 
