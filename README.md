@@ -13,16 +13,16 @@ Weights: **[bot-lab-21/DeepSeek-V4.1-Flash-EXL3-3.5bpw-Pollard](https://huggingf
 This is not our model, our serving stack, or our quantizer. It is our measurements and the glue. See **Credits**.
 
 <!-- BEST-SERVING-START -->
-## Best serving configuration so far (auto-updated 2026-09-11 01:19 Pacific)
-Line B, row `exl3-CH8-B` (accepted rung: NCCL_CH=8). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8, max context = 1000000, max concurrent seqs = 8.
+## Best serving configuration so far (auto-updated 2026-09-11 01:37 Pacific)
+Line A, row `exl3-ROCE-A` (accepted rung: ROCE=1). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8, b12x RoCE one-shot all-reduce = 1.
 
 | | best so far |
 |---|---|
-| single stream, aggregate / per-stream tok/s | 56.4 / 62.2 |
-| 4 streams aggregate tok/s | 142.3 |
-| 6 streams aggregate tok/s | 199.0 |
-| mean TTFT at C1 | 0.24 s |
-| cold prefill 3K / 12K / 47K / 93K tok/s | 1337 / 1243 / 1423 / 1460 |
+| single stream, aggregate / per-stream tok/s | 56.1 / 62.2 |
+| 4 streams aggregate tok/s | 151.4 |
+| 6 streams aggregate tok/s | 199.7 |
+| mean TTFT at C1 | 0.26 s |
+| cold prefill 3K / 12K / 47K / 93K tok/s | 1313 / 1390 / 1440 / 1443 |
 
 Tuning ladder (accept = +3 % single-stream or 6-stream aggregate with ≤5 % prefill loss at 47K and smokes passing; levers stack per line, winners cross-applied):
 
@@ -30,6 +30,7 @@ Tuning ladder (accept = +3 % single-stream or 6-stream aggregate with ≤5 % pre
 |---|---|---|---|---|---|---|
 | A | exl3-G0-A-base0052 | base | 61.1 | 178.7 | 1363 | base |
 | A | exl3-G0-A | base | 62.5 | 193.4 | 1440 | base |
+| A | exl3-ROCE-A | ROCE=1 | 62.2 | 199.7 | 1440 | ACCEPT |
 | B | exl3-G0-B-base0116 | base | 61.2 | 178.6 | 1323 | base |
 | B | exl3-CH8-B | NCCL_CH=8 | 62.2 | 199.0 | 1423 | ACCEPT |
 | B | exl3-SERVE1M-B | MAXLEN=1000000 SEQS=8 | 59.9 | 184.9 | 1475 | ACCEPT |
