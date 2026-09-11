@@ -34,16 +34,16 @@ The shipped 510 GB checkpoint fits four GB10s only with the Engram tables on NVM
 
 The per-matrix weight relative error at K=3 is 0.167 and the output does not move: expert-output errors average out through top-6 routing and the residual stream. Caveat: these rows are the Hessian calibration set (in-domain chat). The held-out checks are the served numbers below.
 
-## Measured — served (TP4, vLLM + cuda-exl3, DSpark k=5, FULL_AND_PIECEWISE graphs, 300K context, gmu 0.80; bench protocol after the upstream recipe's; prompt set v1 is ours and byte-identical across boots) — TBD
-| | shipped MXFP4/FP8 checkpoint (same 4 nodes, same recipe and settings) | this build |
-|---|---|---|
-| single stream, aggregate / per-stream tok/s | 42.3 / 50.5 | 54.7 / 61.1 |
-| 4 streams aggregate tok/s | 102.7 | 133.1 |
-| 6 streams aggregate tok/s | 130.7 | 178.7 |
-| cold prefill 3K / 12K / 47K / 93K tok/s | 1094 / 558 / 1310 / 1292 | 1263 / 1082 / 1363 / 1375 |
-| KV capacity at gmu 0.80 | 1.16 M tokens | 2.56 M tokens |
-| ppl probe (24 held-out texts) | TBD | TBD |
-| HumanEval+ / MBPP+ (greedy) | TBD | TBD |
+## Measured — served (TP4, vLLM + cuda-exl3, DSpark k=5, FULL_AND_PIECEWISE graphs, 300K context, gmu 0.80; bench script and prompt set v1 are the upstream recipe repo's, byte-identical) — TBD
+| | [upstream recipe, published boot 10](https://github.com/tonyd2wild/DeepSeek-V4.1-Flash-vLLM-DGX-Spark/tree/main/results/boot10) (its hardware) | shipped MXFP4/FP8 checkpoint (same recipe, our 4 nodes) | this build (our 4 nodes) |
+|---|---|---|---|
+| single stream, aggregate / per-stream tok/s | 37.95 / 43.12 | 42.3 / 50.5 | 54.7 / 61.1 |
+| 4 streams aggregate tok/s | 85.72 | 102.7 | 133.1 |
+| 6 streams aggregate tok/s | 131.86 | 130.7 | 178.7 |
+| cold prefill 3K / 12K / 47K / 93K tok/s | 902 / 1026 / 1539 / 1194 | 1094 / 558 / 1310 / 1292 | 1263 / 1082 / 1363 / 1375 |
+| KV capacity at gmu 0.80 | 1,078,380 tokens (boot 7, 1M ctx) | 1.16 M tokens | 2.56 M tokens |
+| ppl probe (24 held-out texts) | — | TBD | TBD |
+| HumanEval+ / MBPP+ (greedy) | — | TBD | TBD |
 | needle 300K, tool-call integrity, image probe | TBD | TBD |
 
 ## How it was made (Pollard-method, "route B")

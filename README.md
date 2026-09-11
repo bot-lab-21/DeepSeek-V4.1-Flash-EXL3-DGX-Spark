@@ -6,23 +6,25 @@
 
 DeepSeek-V4.1-Flash is a 552B-parameter mixture-of-experts model (40 layers × 384 routed experts, two Engram n-gram tables, DSpark speculative head) shipped as MXFP4 experts + FP8 dense, 510 GB. It fits four 128 GB DGX Spark (GB10) nodes only because tonyd2wild's recipe keeps the Engram tables on NVMe, and even then leaves about 7 GiB per rank for KV cache. This repository is the recipe that re-quantizes the routed experts to an EXL3 trellis at **3.5 bits per weight** with the Pollard method (Hessian-aware, per-expert, allocated by measured sensitivity), keeps everything else bit-identical, and serves it with vLLM + cuda-exl3 on the same four nodes with the freed memory going to KV cache.
 
+The benchmark script (`v41bench.py`) and prompt set (`prompts-v1.json`) are the upstream repo's, byte-identical, so the columns are the same protocol on different hardware instances.
+
 Weights: **[bot-lab-21/DeepSeek-V4.1-Flash-EXL3-3.5bpw-Pollard](https://huggingface.co/bot-lab-21/DeepSeek-V4.1-Flash-EXL3-3.5bpw-Pollard)** (HF, includes this recipe under `recipe/` and the Engram hot-row ids).
 
 This is not our model, our serving stack, or our quantizer. It is our measurements and the glue. See **Credits**.
 
 ## Results
 
-| measurement | shipped MXFP4/FP8 checkpoint, same serving recipe and settings, same 4 nodes | EXL3 3.5 bpw experts (this build) |
-|---|---|---|
-| weights loaded per rank | ~81 GiB | **62.8 GiB** (measured at load) |
-| calibration NLL, 10-node held-out rows, vs bf16 reference | 1.3209 | 1.3177 ± 0.006 (flat; all-K3 fallback 1.3152 ± 0.003) |
-| per-matrix weight relative error | — | 0.167 |
-| single stream, aggregate / per-stream tok/s | 42.3 / 50.5 | 54.7 / 61.1 |
-| 4 streams aggregate tok/s | 102.7 | 133.1 |
-| 6 streams aggregate tok/s | 130.7 | 178.7 |
-| cold prefill 3K / 12K / 47K / 93K tok/s | 1094 / 558 / 1310 / 1292 | 1263 / 1082 / 1363 / 1375 |
-| KV capacity at gmu 0.80 | 6.99 GiB/rank = 1.16 M tokens | 2.56 M tokens |
-| ppl probe (24 held-out texts), HumanEval+ / MBPP+ | TBD | TBD |
+| measurement | [upstream recipe, published boot 10](https://github.com/tonyd2wild/DeepSeek-V4.1-Flash-vLLM-DGX-Spark/tree/main/results/boot10) (its hardware) | shipped MXFP4/FP8 checkpoint, same recipe, our 4 nodes | EXL3 3.5 bpw experts (this build, our 4 nodes) |
+|---|---|---|---|
+| weights loaded per rank | 81.6 GiB | ~81 GiB | **62.8 GiB** (measured at load) |
+| calibration NLL, 10-node held-out rows, vs bf16 reference | — | 1.3209 | 1.3177 ± 0.006 (flat; all-K3 fallback 1.3152 ± 0.003) |
+| per-matrix weight relative error | — | — | 0.167 |
+| single stream, aggregate / per-stream tok/s | 37.95 / 43.12 | 42.3 / 50.5 | 54.7 / 61.1 |
+| 4 streams aggregate tok/s | 85.72 | 102.7 | 133.1 |
+| 6 streams aggregate tok/s | 131.86 | 130.7 | 178.7 |
+| cold prefill 3K / 12K / 47K / 93K tok/s | 902 / 1026 / 1539 / 1194 | 1094 / 558 / 1310 / 1292 | 1263 / 1082 / 1363 / 1375 |
+| KV capacity at gmu 0.80 | 1,078,380 tokens (boot 7, 1M ctx) | 6.99 GiB/rank = 1.16 M tokens | 2.56 M tokens |
+| ppl probe (24 held-out texts), HumanEval+ / MBPP+ | — | TBD | TBD |
 
 Engram: the top 100 M rows of each n-gram table (by frequency over 1.12 B tokens of real assistant traffic) cover **92.7 %** of held-out lookups (43 % at 1 M, 74 % at 20 M). Quantizing Engram rows to fp4 (mxfp4 or nvfp4) was NLL-neutral within noise. The ids are published with the weights; the serving patch can keep them resident.
 
