@@ -7,7 +7,7 @@ tags: [deepseek, deepseek-v4.1-flash, exl3, exllamav3, mixture-of-experts, dgx-s
 
 # DeepSeek-V4.1-Flash — EXL3 routed experts (3.5 bpw) for a 4× DGX Spark tensor-parallel line
 
-**DRAFT — not published. Cells marked TBD are filled from the served gate; every other number was measured on our hardware. Do not upload before the human review.**
+**Work in progress (2026-09-11): the checkpoint is complete and serving; cells marked TBD are being filled from the served tuning gate over the next hours. Every number here was measured on our hardware.**
 
 > **Built on two people's work above all.** The quantization follows the **Pollard method** as framed and documented in [WestWaters/pollard-weights](https://github.com/WestWaters/pollard-weights) (Hessian-aware, sensitivity-allocated expert quantization; our ledgers and tools are contributed back there). The serving recipe is **[tonyd2wild's DeepSeek-V4.1-Flash-vLLM-DGX-Spark](https://github.com/tonyd2wild/DeepSeek-V4.1-Flash-vLLM-DGX-Spark)** — the patch set, Engram-on-NVMe staging (with Kai), worker-first boot, image chain and bench protocol; we changed the expert bytes and added a few levers on top. If you use this, cite them first.
 

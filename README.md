@@ -1,6 +1,6 @@
 # DeepSeek-V4.1-Flash on four DGX Sparks with EXL3 routed experts (3.5 bpw) — recipe and receipts
 
-**Status: DRAFT — private until the served gate numbers are in and reviewed. Every number below was measured on our cluster; cells marked TBD are filled from the first served gate.**
+**Status: work in progress (2026-09-11) — the checkpoint serves on two 4-node lines; cells marked TBD are being filled from the tuning gate. Every number below was measured on our cluster.**
 
 > **Built on two people's work above all.** The quantization follows the **Pollard method** as framed and documented in [WestWaters/pollard-weights](https://github.com/WestWaters/pollard-weights) (Hessian-aware, sensitivity-allocated expert quantization; our ledgers and tools are contributed back there). The serving recipe is **[tonyd2wild's DeepSeek-V4.1-Flash-vLLM-DGX-Spark](https://github.com/tonyd2wild/DeepSeek-V4.1-Flash-vLLM-DGX-Spark)** — the patch set, Engram-on-NVMe staging (with Kai), worker-first boot, image chain and bench protocol; we changed the expert bytes and added a few levers on top. If you use this, cite them first.
 
