@@ -1,6 +1,6 @@
 # DeepSeek-V4.1-Flash on four DGX Sparks with EXL3 routed experts (3.5 bpw) — recipe and receipts
 
-**Status: work in progress (2026-09-11) — the checkpoint serves on two 4-node lines; cells marked TBD are being filled from the tuning gate. Every number below was measured on our cluster.**
+**Status (2026-09-11): released. Every number below was measured on our cluster; the served configuration and its per-lever credits are kept current in the block below.**
 
 > **Built on two people's work above all.** The quantization follows the **Pollard method** as framed and documented in [WestWaters/pollard-weights](https://github.com/WestWaters/pollard-weights) (Hessian-aware, sensitivity-allocated expert quantization; our ledgers and tools are contributed back there). The serving recipe is **[tonyd2wild's DeepSeek-V4.1-Flash-vLLM-DGX-Spark](https://github.com/tonyd2wild/DeepSeek-V4.1-Flash-vLLM-DGX-Spark)** — the patch set, Engram-on-NVMe staging (with Kai), worker-first boot, image chain and bench protocol; we changed the expert bytes and added a few levers on top. If you use this, cite them first.
 
@@ -77,9 +77,9 @@ Levers in the served configurations and where they come from (full ledger in `CR
 | 6 streams aggregate tok/s | 131.86 | 130.7 | 178.7 |
 | cold prefill 3K / 12K / 47K / 93K tok/s | 902 / 1026 / 1539 / 1194 | 1094 / 558 / 1310 / 1292 | 1263 / 1082 / 1363 / 1375 |
 | KV capacity at gmu 0.80 | 1,078,380 tokens (boot 7, 1M ctx) | 6.99 GiB/rank = 1.16 M tokens | 2.56 M tokens |
-| ppl probe (6 held-out texts, 4,210 tokens) | — | TBD (pending) | 4.043 |
-| HumanEval / HumanEval+ pass@1 (greedy, evalplus) | — | TBD (pending) | 0.951 / 0.921 |
-| MBPP+ (greedy) | — | TBD | pending |
+| ppl probe (6 held-out texts, 4,210 tokens) | — | not measured | 4.043 |
+| HumanEval / HumanEval+ pass@1 (greedy, evalplus) | — | not measured | 0.951 / 0.921 |
+| MBPP+ (greedy) | — | not measured | not measured (battery timed out) |
 | needle at 219K tokens (2 keys) | — | — | PASS / PASS |
 | 1M-context serving row (pin + NCCL channels 8, `--max-model-len 1000000`) | 1M ctx: KV 1,078,380 tokens (boot 7) | — | C1 54.8 / 59.9, C4 141.8, C6 184.9, prefill 673 / 1007 / 1475 / 1449; **3.41 M tokens KV** |
 | **production (1M context), line A: pin + NCCL ch 8 + RoCE + async + b12x MXFP8 dense kernel** | — | — | C1 55.9 / 61.4, C4 147.2, C6 192.0, TTFT 0.25, prefill 1142 / 1326 / 1385 / 1406; KV 3.41 M tokens (11 Sep 11:36) |

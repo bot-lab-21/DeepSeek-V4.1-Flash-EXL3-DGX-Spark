@@ -7,7 +7,7 @@ tags: [deepseek, deepseek-v4.1-flash, exl3, exllamav3, mixture-of-experts, dgx-s
 
 # DeepSeek-V4.1-Flash — EXL3 routed experts (3.5 bpw) for a 4× DGX Spark tensor-parallel line
 
-**Work in progress (2026-09-11): the checkpoint is complete and serving; cells marked TBD are being filled from the served tuning gate over the next hours. Every number here was measured on our hardware.**
+**Status (2026-09-11): released. Every number here was measured on our hardware; the served configuration and its per-lever credits are kept current in the block below.**
 
 > **Built on two people's work above all.** The quantization follows the **Pollard method** as framed and documented in [WestWaters/pollard-weights](https://github.com/WestWaters/pollard-weights) (Hessian-aware, sensitivity-allocated expert quantization; our ledgers and tools are contributed back there). The serving recipe is **[tonyd2wild's DeepSeek-V4.1-Flash-vLLM-DGX-Spark](https://github.com/tonyd2wild/DeepSeek-V4.1-Flash-vLLM-DGX-Spark)** — the patch set, Engram-on-NVMe staging (with Kai), worker-first boot, image chain and bench protocol; we changed the expert bytes and added a few levers on top. If you use this, cite them first.
 
@@ -87,7 +87,7 @@ Levers in the served configurations and where they come from (full ledger in `CR
 
 The per-matrix weight relative error at K=3 is 0.167 and the output does not move: expert-output errors average out through top-6 routing and the residual stream. Caveat: these rows are the Hessian calibration set (in-domain chat). The held-out checks are the served numbers below.
 
-## Measured — served (TP4, vLLM + cuda-exl3, DSpark k=5, FULL_AND_PIECEWISE graphs, 300K context, gmu 0.80; bench script and prompt set v1 are the upstream recipe repo's, byte-identical) — TBD
+## Measured — served (TP4, vLLM + cuda-exl3, DSpark k=5, FULL_AND_PIECEWISE graphs, 300K context, gmu 0.80; bench script and prompt set v1 are the upstream recipe repo's, byte-identical)
 | | [upstream recipe, published boot 10](https://github.com/tonyd2wild/DeepSeek-V4.1-Flash-vLLM-DGX-Spark/tree/main/results/boot10) (its hardware) | shipped MXFP4/FP8 checkpoint (same recipe, our 4 nodes) | this build (our 4 nodes) |
 |---|---|---|---|
 | single stream, aggregate / per-stream tok/s | 37.95 / 43.12 | 42.3 / 50.5 | 54.7 / 61.1 |
@@ -95,15 +95,15 @@ The per-matrix weight relative error at K=3 is 0.167 and the output does not mov
 | 6 streams aggregate tok/s | 131.86 | 130.7 | 178.7 |
 | cold prefill 3K / 12K / 47K / 93K tok/s | 902 / 1026 / 1539 / 1194 | 1094 / 558 / 1310 / 1292 | 1263 / 1082 / 1363 / 1375 |
 | KV capacity at gmu 0.80 | 1,078,380 tokens (boot 7, 1M ctx) | 1.16 M tokens | 2.56 M tokens |
-| ppl probe (6 held-out texts, 4,210 tokens) | — | TBD (pending) | 4.043 |
-| HumanEval / HumanEval+ pass@1 (greedy, evalplus) | — | TBD (pending) | 0.951 / 0.921 |
-| MBPP+ (greedy) | — | TBD | pending (battery timed out mid-run; re-running) |
+| ppl probe (6 held-out texts, 4,210 tokens) | — | not measured | 4.043 |
+| HumanEval / HumanEval+ pass@1 (greedy, evalplus) | — | not measured | 0.951 / 0.921 |
+| MBPP+ (greedy) | — | not measured | not measured (battery timed out) |
 | needle at 219K tokens (2 keys) | — | — | PASS / PASS |
 | 1M-context serving row (line B, pin + NCCL channels 8, `--max-model-len 1000000`) | — | — | C1 54.8 / 59.9, C4 141.8, C6 184.9, prefill 673 / 1007 / 1475 / 1449; **3.41 M tokens KV** (3.4 full-length requests) |
 | **production (1M context), line A: pin + NCCL ch 8 + RoCE + async + b12x MXFP8 dense kernel** | — | — | C1 55.9 / 61.4, C4 147.2, C6 192.0, TTFT 0.25, prefill 1142 / 1326 / 1385 / 1406; KV 3.41 M tokens (11 Sep 11:36) |
 | **production (1M context), line B: pin + NCCL ch 8 + RoCE + b12x MXFP8 dense kernel** | — | — | C1 56.3 / 62.3, C4 149.6, C6 178.7, TTFT 0.25, prefill 1067 / 1174 / 1396 / 1418; KV 3.41 M tokens (11 Sep 11:15). Run-to-run spread on this fleet is about ±5 %: the same config benched C6 192.7 two hours earlier |
 | **optional KV grouping fix** (`recipe/patches/kvgroup`, env `DSV41_KV_GROUPING=fine`) | — | — | KV 3.41 M → **5.57 M tokens at 1M** (+63 %) for −6 % single-stream / −8 % C6 (47 KV groups of scheduler work); off in our served bases |
-| needle 300K, tool-call integrity, image probe | TBD | TBD |
+| tool-call integrity (12 calls) · image probe | — | tool calls PASS · image probe not run (text-only serving line) |
 
 ## How it was made (Pollard-method, "route B")
 1. **Exact bf16 upscale** of the release (fp8 · 2^(ue8m0−127) 32×32 blocks; MXFP4 e2m1 LUT × per-32 ue8m0 scale), round-trip checked. There is no native bf16 release; the source is a 4.25-bit QAT checkpoint. Gate-0 measured that EXL3 on these FP4-grid weights behaves exactly like a Gaussian control, so the grid neither helps nor hurts the trellis quantizer.
@@ -111,7 +111,7 @@ The per-matrix weight relative error at K=3 is 0.167 and the output does not mov
 3. **Per-expert Hessians** (H shared by gate/up; H_down from silu(xW1)·xW3 of the routed tokens) → exllamav3's `quantize_exl3` per expert (K=3 all layers, 57 min/layer per GB10; K=4 down-only 16 min; K=4 gate/up 30 min), with a JSON ledger per layer.
 4. **Allocation**: cost(layer, matrix, K) = gain² · Σ_experts tokens · proxy_err, where gain is the layer's measured hyper-connection write gain into the residual (5–7.5× at layers 0–13, ≈1 at 19–30, 0.03–0.2 at 36–39). Greedy K=3→4 to 3.5 bpw; K=4/K=3 error ratio measured 0.254. Result: down-proj K=4 on layers 0–14, 16–18, 20–27; gate/up K=4 on layers 0–14, 16–18, 20–22, 24, 25; layers 28–39 stay K=3.
 5. **Splice**: expert tensors rewritten per body shard, everything else hardlinked from the release; `quantization_config` in the cuda-exl3 layout.
-Measurements and (sanitized) tooling are contributed to the Pollard Weights repository (link TBD when the PR is open).
+Measurements and (sanitized) tooling are contributed to the Pollard Weights repository ([WestWaters/pollard-weights PR #72](https://github.com/WestWaters/pollard-weights/pull/72), merged).
 
 ## Engram
 The two n-gram tables (203 GB fp8) are unchanged; the serving recipe reads their rows from NVMe before each forward. Two measured facts for anyone making them resident: fp4 rows (MXFP4 or NVFP4) cost no NLL (Δ −0.003 ± 0.003 while 80–100 % of elements change), and row accesses are Zipfian (top 1 M of 384 M rows = 62 % of lookups in-sample, top 5 M = 89 %); our frequency ledger (not shipped; ask) lists the top 100 M ids per table = 92.7 % held-out coverage (24.6 GiB fp8 per table = ~6.1 GiB per TP4 rank per table, half at fp4; coverage curve: 1 M 43 %, 5 M 59 %, 10 M 67 %, 20 M 74 %, 50 M 84 %, 100 M 93 %); a reference implementation (resident hits by binary search, misses to disk) is in our recipe notes.
