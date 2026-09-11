@@ -1,0 +1,4 @@
+FROM vllm-dsv41:overlay7
+# bot-labs-21: GB10 spin-wait heat fix (drowzeys/vllm-gb10-spin-wait-fix, as in our GLM v18.1-vision-spinfix image): SpinCondition busy_loop_s 1 -> 0.002
+RUN f=/usr/local/lib/python3.12/dist-packages/vllm/distributed/device_communicators/shm_broadcast.py && grep -q "busy_loop_s: float = 1," $f && sed -i "s/busy_loop_s: float = 1,/busy_loop_s: float = 0.002,/" $f && grep -n "busy_loop_s: float = 0.002" $f
+LABEL botlabs21.overlay8="spin-wait fix busy_loop_s=0.002"

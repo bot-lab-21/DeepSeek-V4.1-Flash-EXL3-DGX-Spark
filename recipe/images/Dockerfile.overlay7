@@ -1,0 +1,5 @@
+FROM vllm-dsv41:overlay6
+# bot-labs-21: cuda-exl3 1.0.3 + V4.1 overlay (P1-P5), compiled for sm_121a against the vehicle torch
+COPY . /opt/cuda-exl3-v41
+ENV TORCH_CUDA_ARCH_LIST=12.1a MAX_JOBS=8
+RUN cd /opt/cuda-exl3-v41 && pip install --no-deps --no-build-isolation . 2>&1 | tail -n 5 && python3 -c "import cuda_exl3, torch; print(\"cuda_exl3 import ok\")"

@@ -1,0 +1,7 @@
+FROM vllm-dsv41:overlay5
+# bot-labs-21: b12x one-shot collectives (PCIe + RoCE) from our 0.29.0+b12x port — runtime package + vLLM shim (5 files)
+COPY b12x_pkg/b12x /usr/local/lib/python3.12/dist-packages/b12x
+COPY patched/b12x_pcie_all_reduce.py patched/b12x_roce_all_reduce.py patched/cuda_communicator.py /usr/local/lib/python3.12/dist-packages/vllm/distributed/device_communicators/
+COPY patched/parallel_state.py /usr/local/lib/python3.12/dist-packages/vllm/distributed/parallel_state.py
+COPY patched/envs.py /usr/local/lib/python3.12/dist-packages/vllm/envs.py
+LABEL botlabs21.overlay6="b12x roce/pcie one-shot collectives shim; cutlass-dsl left at the vehicle version"
