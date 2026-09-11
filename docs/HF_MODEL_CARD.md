@@ -34,8 +34,8 @@ The shipped 510 GB checkpoint fits four GB10s only with the Engram tables on NVM
 
 The per-matrix weight relative error at K=3 is 0.167 and the output does not move: expert-output errors average out through top-6 routing and the residual stream. Caveat: these rows are the Hessian calibration set (in-domain chat). The held-out checks are the served numbers below.
 
-## Measured — served (TP4, vLLM + cuda-exl3, DSpark k=5, FULL_AND_PIECEWISE graphs, 300K context, gmu 0.80; bench protocol and prompt set from tonyd2wild's repo) — TBD
-| | shipped MXFP4 (same 4 nodes, same recipe) | this build |
+## Measured — served (TP4, vLLM + cuda-exl3, DSpark k=5, FULL_AND_PIECEWISE graphs, 300K context, gmu 0.80; bench protocol after the upstream recipe's; prompt set v1 is ours and byte-identical across boots) — TBD
+| | shipped MXFP4/FP8 checkpoint (same 4 nodes, same recipe and settings) | this build |
 |---|---|---|
 | single stream, aggregate / per-stream tok/s | 42.3 / 50.5 | TBD |
 | 4 streams aggregate tok/s | 102.7 | TBD |

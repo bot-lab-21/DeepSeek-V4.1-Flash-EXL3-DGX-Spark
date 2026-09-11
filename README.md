@@ -12,7 +12,7 @@ This is not our model, our serving stack, or our quantizer. It is our measuremen
 
 ## Results
 
-| measurement | shipped MXFP4/FP8 (tonyd2wild boot-10 config, our fleet) | EXL3 3.5 bpw experts (this recipe) |
+| measurement | shipped MXFP4/FP8 checkpoint, same serving recipe and settings, same 4 nodes | EXL3 3.5 bpw experts (this build) |
 |---|---|---|
 | weights loaded per rank | ~81 GiB | **62.8 GiB** (measured at load) |
 | calibration NLL, 10-node held-out rows, vs bf16 reference | 1.3209 | 1.3177 ± 0.006 (flat; all-K3 fallback 1.3152 ± 0.003) |
