@@ -71,7 +71,7 @@ The per-matrix weight relative error at K=3 is 0.167 and the output does not mov
 | HumanEval / HumanEval+ pass@1 (greedy, evalplus) | — | TBD (pending) | 0.951 / 0.921 |
 | MBPP+ (greedy) | — | TBD | pending (battery timed out mid-run; re-running) |
 | needle at 219K tokens (2 keys) | — | — | PASS / PASS |
-| 1M-context serving row (line B, pin + NCCL channels 8, `--max-model-len 1000000`) | — | — | C1 56.4 / 59.9, C6 184.9, prefill@47K 1475; **3.41 M tokens KV** (3.4 full-length requests) |
+| 1M-context serving row (line B, pin + NCCL channels 8, `--max-model-len 1000000`) | — | — | C1 54.8 / 59.9, C4 141.8, C6 184.9, prefill 673 / 1007 / 1475 / 1449; **3.41 M tokens KV** (3.4 full-length requests) |
 | needle 300K, tool-call integrity, image probe | TBD | TBD |
 
 ## How it was made (Pollard-method, "route B")
