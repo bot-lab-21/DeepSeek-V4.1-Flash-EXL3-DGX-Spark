@@ -27,7 +27,7 @@ The shipped 510 GB checkpoint fits four GB10s only with the Engram tables on NVM
 | Engram hot-row ids | **not shipped** (removed 2026-09-11): a 20 M-row resident set measured −4 to −6 % single-stream on both lines (CPU hit/miss split); the frequency ledger itself (top 100 M ids per table = 92.7 % held-out coverage) is available on request and described below |
 
 <!-- BEST-SERVING-START -->
-## Best serving configuration so far (auto-updated 2026-09-11 11:17 Pacific)
+## Best serving configuration so far (auto-updated 2026-09-11 11:38 Pacific)
 Line A, row `exl3-ROCE-A` (accepted rung: ROCE=1). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8, b12x RoCE one-shot all-reduce = 1, async scheduling = 1, max context = 1000000, max concurrent seqs = 8, DISABLED_KERNELS = FlashInferCutedslMxfp8LinearKernel,FlashInferCutlassMxfp8LinearKernel,MarlinMxfp8LinearKernel.
 
 | | best so far |
