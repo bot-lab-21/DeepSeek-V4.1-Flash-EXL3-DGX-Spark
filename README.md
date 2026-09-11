@@ -13,7 +13,7 @@ Weights: **[bot-lab-21/DeepSeek-V4.1-Flash-EXL3-3.5bpw-Pollard](https://huggingf
 This is not our model, our serving stack, or our quantizer. It is our measurements and the glue. See **Credits**.
 
 <!-- BEST-SERVING-START -->
-## Best serving configuration so far (auto-updated 2026-09-11 08:34 Pacific)
+## Best serving configuration so far (auto-updated 2026-09-11 08:40 Pacific)
 Line A, row `exl3-ROCE-A` (accepted rung: ROCE=1). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8, b12x RoCE one-shot all-reduce = 1, async scheduling = 1, max context = 1000000, max concurrent seqs = 8, MAX_BATCHED = 16384.
 
 | | best so far |
@@ -40,7 +40,7 @@ Tuning ladder (accept = +3 % single-stream or 6-stream aggregate with ≤5 % pre
 | B | exl3-SERVE1M-B | MAXLEN=1000000 SEQS=8 | 59.9 | 184.9 | 1475 | ACCEPT |
 | B | exl3-G0-B-base09110801 | base | 61.5 | 185.6 | 1417 | base |
 | B | exl3-ROCE-B | ROCE=1 | 64.9 | 189.8 | 1436 | ACCEPT |
-| B | exl3-G0-B | base | 65.2 | 185.1 | 1452 | base |
+| B | exl3-G0-B-base09110837 | base | 65.2 | 185.1 | 1452 | base |
 | A | exl3-HOT-A | HOT_DIR=/mnt/glm52/dsv41engram/hot90 HOT_ROWS=20000000 | 63.63 | 198.07 | 1354.5 | reject |
 | A | exl3-FLUSH8-A | FLUSH_GIB=8 | 64.83 | 181.74 | 1422.5 | reject |
 | A | exl3-NTH256-A | NCCL_NTHREADS=256 | 63.95 | 184.97 | 1416.9 | reject |
