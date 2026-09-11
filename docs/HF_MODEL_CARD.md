@@ -27,8 +27,8 @@ The shipped 510 GB checkpoint fits four GB10s only with the Engram tables on NVM
 | `engram_hot90_L01.safetensors`, `engram_hot90_L14.safetensors`, `engram_hot90_README.md` | **included**: Engram row ids sorted by corpus frequency (int64) with counts, the top 100 M row ids per table = **92.7 % of lookups on held-out text** (from hashing 1.1 B in-domain tokens with DeepSeek's `NgramHashState`, no forward needed; 106 M distinct rows were ever touched), for a resident hot set with disk for misses (see *Engram*) |
 
 <!-- BEST-SERVING-START -->
-## Best serving configuration so far (auto-updated 2026-09-11 06:06 Pacific)
-Line A, row `exl3-ROCE-A` (accepted rung: ROCE=1). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8, b12x RoCE one-shot all-reduce = 1, async scheduling = 1, max context = 1000000, max concurrent seqs = 8.
+## Best serving configuration so far (auto-updated 2026-09-11 06:31 Pacific)
+Line A, row `exl3-ROCE-A` (accepted rung: ROCE=1). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8, b12x RoCE one-shot all-reduce = 1, async scheduling = 1, max context = 1000000, max concurrent seqs = 8, MAX_BATCHED = 16384.
 
 | | best so far |
 |---|---|
@@ -48,6 +48,7 @@ Tuning ladder (accept = +3 % single-stream or 6-stream aggregate with ≤5 % pre
 | A | exl3-ASYNC-A | ASYNC=1 | 68.0 | 193.6 | 1440 | ACCEPT |
 | A | exl3-SERVE1M-A | MAXLEN=1000000 SEQS=8 | 64.4 | 189.9 | 1419 | ACCEPT |
 | A | exl3-G0-A | base | 65.1 | 184.7 | 1403 | base |
+| A | exl3-MAXB16K-A | MAX_BATCHED=16384 | 65.5 | 193.2 | 1405 | ACCEPT |
 | B | exl3-G0-B-base0116 | base | 61.2 | 178.6 | 1323 | base |
 | B | exl3-CH8-B | NCCL_CH=8 | 62.2 | 199.0 | 1423 | ACCEPT |
 | B | exl3-SERVE1M-B | MAXLEN=1000000 SEQS=8 | 59.9 | 184.9 | 1475 | ACCEPT |
