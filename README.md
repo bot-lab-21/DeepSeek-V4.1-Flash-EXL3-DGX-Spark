@@ -17,10 +17,10 @@ This is not our model, our serving stack, or our quantizer. It is our measuremen
 | weights loaded per rank | ~81 GiB | **62.8 GiB** (measured at load) |
 | calibration NLL, 10-node held-out rows, vs bf16 reference | 1.3209 | 1.3177 ± 0.006 (flat; all-K3 fallback 1.3152 ± 0.003) |
 | per-matrix weight relative error | — | 0.167 |
-| single stream, aggregate / per-stream tok/s | 42.3 / 50.5 | TBD |
-| 4 streams aggregate tok/s | 102.7 | TBD |
-| 6 streams aggregate tok/s | 130.7 | TBD |
-| cold prefill 3K / 12K / 47K / 93K tok/s | 1094 / 558 / 1310 / 1292 | TBD |
+| single stream, aggregate / per-stream tok/s | 42.3 / 50.5 | 54.7 / 61.1 |
+| 4 streams aggregate tok/s | 102.7 | 133.1 |
+| 6 streams aggregate tok/s | 130.7 | 178.7 |
+| cold prefill 3K / 12K / 47K / 93K tok/s | 1094 / 558 / 1310 / 1292 | 1263 / 1082 / 1363 / 1375 |
 | KV capacity at gmu 0.80 | 6.99 GiB/rank = 1.16 M tokens | TBD |
 | ppl probe (24 held-out texts), HumanEval+ / MBPP+ | TBD | TBD |
 
