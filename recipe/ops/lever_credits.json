@@ -1,0 +1,20 @@
+{
+  "NCCL_CH": "NCCL channels 8 — lever from tenaiaiai's dsv41-flash-4x-dgx-spark-ja recipe (https://github.com/tenaiaiai/dsv41-flash-4x-dgx-spark-ja)",
+  "ROCE": "b12x one-shot RoCE all-reduce — Luke Alonso and the b12x contributors (https://github.com/local-inference-lab/b12x), vLLM shim ported from local-inference-lab/vllm",
+  "ASYNC": "async scheduling — vLLM project",
+  "MAX_BATCHED": "16K max batched tokens for prefill — alexellis (glm-5.3-flash-4x-dgx-spark-switchless) and tonyd2wild (GLM-5.3-Flash-4x)",
+  "DISABLED_KERNELS": "b12x MXFP8 dense GEMM kernel (`B12xMxfp8LinearKernel`, b12x by Luke Alonso and contributors) selected over the CUTLASS path — idea from MiaAI-Lab's DeepSeek-v4.1-Flash-DGX-Sparks write-up (SGLang), re-measured on our stack",
+  "WOPROJ": "fused MXFP8 inverse-RoPE + WO-A + WO-B output projection — b12x `gemm.wo_projection` (Luke Alonso and contributors); routing idea from MiaAI-Lab's DeepSeek-v4.1-Flash-DGX-Sparks (AGPL, ideas only — no code copied)",
+  "KVGROUP": "vLLM KV-cache grouping fix (`DSV41_KV_GROUPING=fine`) — our patch, prompted by MiaAI-Lab's KV bytes-per-token accounting and Kai/tonyd2wild's SM12x page-size patch that exposed the padding",
+  "NCCL_BUFFSIZE": "NCCL pinned connection-buffer knobs (BUFFSIZE / LL128_BUFFSIZE / ^LL128) — MiaAI-Lab's DeepSeek-v4.1-Flash-DGX-Sparks",
+  "NCCL_LL128_BUFFSIZE": "",
+  "NCCL_PROTO": "",
+  "KV_BYTES": "pinned KV cache — our fix for vLLM sizing KV from rank 0 only under the uneven expert split",
+  "GMU": "",
+  "MEM_MIN_GIB": "per-rank memory gate — ours; unconditional load-time flush idea from tonyd2wild",
+  "MAXLEN": "",
+  "SEQS": "",
+  "ENGRAM_THREADS": "Engram disk threads — tenaiaiai / tonyd2wild",
+  "HOT_DIR": "resident Engram hot rows — ours (measured regression); 0xSero's Engram-outside-GPU line of thinking",
+  "SPEC_K": "DSpark draft depth — DeepSeek-AI / vLLM recipes"
+}

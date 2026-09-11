@@ -79,6 +79,20 @@ if best:
             for l in open(md):
                 m = re.match(r"\| (\w+) \| ([^|]*) \| ([0-9.]+) \| ([0-9.]+) \| ([0-9.]+) \| (reject[^|]*) \|", l)
                 if m: block.append(f"| {line} | exl3-{m.group(1)}-{line} | {m.group(2).strip()} | {m.group(3)} | {m.group(4)} | {m.group(5)} | reject |")
+    # credits for every lever in the accepted bases of both lines (user rule: credit the source the day a lever is adopted)
+    try:
+        cred = json.load(open(f"{K}/ops/lever_credits.json"))
+        seen_c = []
+        for line in "AB":
+            for kv in accepted(line):
+                k = kv.partition("=")[0].strip()
+                c = cred.get(k, "")
+                if c and c not in seen_c: seen_c.append(c)
+        if seen_c:
+            block.append(""); block.append("Levers in the served configurations and where they come from (full ledger in `CREDITS.md`):"); block.append("")
+            for c in seen_c: block.append(f"- {c}")
+    except Exception as ex:
+        block.append(f"<!-- lever credits unavailable: {ex} -->")
     block.append("<!-- BEST-SERVING-END -->")
     text = "\n".join(block)
     for p in [f"{K}/release/HF_MODEL_CARD_dsv41_exl3.md", f"{K}/release/GITHUB_README.md"]:

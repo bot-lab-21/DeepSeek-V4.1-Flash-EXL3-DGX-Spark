@@ -27,7 +27,7 @@ The shipped 510 GB checkpoint fits four GB10s only with the Engram tables on NVM
 | Engram hot-row ids | **not shipped** (removed 2026-09-11): a 20 M-row resident set measured −4 to −6 % single-stream on both lines (CPU hit/miss split); the frequency ledger itself (top 100 M ids per table = 92.7 % held-out coverage) is available on request and described below |
 
 <!-- BEST-SERVING-START -->
-## Best serving configuration so far (auto-updated 2026-09-11 08:40 Pacific)
+## Best serving configuration so far (auto-updated 2026-09-11 08:52 Pacific)
 Line A, row `exl3-ROCE-A` (accepted rung: ROCE=1). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8, b12x RoCE one-shot all-reduce = 1, async scheduling = 1, max context = 1000000, max concurrent seqs = 8, MAX_BATCHED = 16384.
 
 | | best so far |
@@ -62,6 +62,15 @@ Tuning ladder (accept = +3 % single-stream or 6-stream aggregate with ≤5 % pre
 | B | exl3-HOT-B | HOT_DIR=/mnt/glm52/dsv41engram/hot90 HOT_ROWS=20000000 | 59.9 | 188.0 | 1424 | reject |
 | B | exl3-FLUSH8-B | FLUSH_GIB=8 | 62.07 | 185.05 | 1436.4 | reject |
 | B | exl3-MAXB16K-B | MAX_BATCHED=16384 | 64.88 | 188.53 | 1403.1 | reject |
+
+Levers in the served configurations and where they come from (full ledger in `CREDITS.md`):
+
+- pinned KV cache — our fix for vLLM sizing KV from rank 0 only under the uneven expert split
+- per-rank memory gate — ours; unconditional load-time flush idea from tonyd2wild
+- NCCL channels 8 — lever from tenaiaiai's dsv41-flash-4x-dgx-spark-ja recipe (https://github.com/tenaiaiai/dsv41-flash-4x-dgx-spark-ja)
+- b12x one-shot RoCE all-reduce — Luke Alonso and the b12x contributors (https://github.com/local-inference-lab/b12x), vLLM shim ported from local-inference-lab/vllm
+- async scheduling — vLLM project
+- 16K max batched tokens for prefill — alexellis (glm-5.3-flash-4x-dgx-spark-switchless) and tonyd2wild (GLM-5.3-Flash-4x)
 <!-- BEST-SERVING-END -->
 
 ## Measured — pre-serving (DeepSeek's reference forward with every routed expert replaced by its EXL3 reconstruction; 39 in-domain calibration rows × 2048 tokens, paired per row against bf16)
