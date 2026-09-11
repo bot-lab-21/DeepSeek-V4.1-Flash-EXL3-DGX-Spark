@@ -8,7 +8,7 @@ DeepSeek-V4.1-Flash is a 552B-parameter mixture-of-experts model (40 layers × 3
 
 The benchmark script (`v41bench.py`) and prompt set (`prompts-v1.json`) are the upstream repo's, byte-identical, so the columns are the same protocol on different hardware instances.
 
-Weights: **[bot-lab-21/DeepSeek-V4.1-Flash-EXL3-3.5bpw-Pollard](https://huggingface.co/bot-lab-21/DeepSeek-V4.1-Flash-EXL3-3.5bpw-Pollard)** (HF, includes this recipe under `recipe/` and the Engram hot-row ids).
+Weights: **[bot-lab-21/DeepSeek-V4.1-Flash-EXL3-3.5bpw-Pollard](https://huggingface.co/bot-lab-21/DeepSeek-V4.1-Flash-EXL3-3.5bpw-Pollard)** (HF, includes this recipe under `recipe/`).
 
 This is not our model, our serving stack, or our quantizer. It is our measurements and the glue. See **Credits**.
 
@@ -69,7 +69,7 @@ Tuning ladder (accept = +3 % single-stream or 6-stream aggregate with ≤5 % pre
 | **production (1M context), line A: pin + NCCL ch 8 + RoCE + async + 16K batch** | — | — | C1 58.4 / 65.1, C4 148.4, C6 183.1, TTFT 0.26, prefill 1312 / 1412 / 1411 / 1391; KV 2.99 M tokens |
 | **production (1M context), line B: pin + NCCL ch 8 + RoCE** | — | — | C1 55.5 / 61.8, C4 149.4, C6 192.7, TTFT 0.25, prefill 1343 / 1176 / 1459 / 1463; KV 3.41 M tokens |
 
-Engram: the top 100 M rows of each n-gram table (by frequency over 1.12 B tokens of real assistant traffic) cover **92.7 %** of held-out lookups (43 % at 1 M, 74 % at 20 M). Quantizing Engram rows to fp4 (mxfp4 or nvfp4) was NLL-neutral within noise. The ids are published with the weights; the serving patch can keep them resident.
+Engram: the top 100 M rows of each n-gram table (by frequency over 1.12 B tokens of real assistant traffic) cover **92.7 %** of held-out lookups (43 % at 1 M, 74 % at 20 M). Quantizing Engram rows to fp4 (mxfp4 or nvfp4) was NLL-neutral within noise. A 20 M-row resident set (CPU hit/miss split) measured −4 to −6 % single-stream on both lines, so the ids are not shipped; a GPU-side gather is the open follow-up.
 
 ## Hardware
 
@@ -89,7 +89,7 @@ Exact bf16 upscale of the MXFP4 checkpoint → DeepSeek's reference forward over
 ## Layout
 
 - `recipe/` — launcher, boot, node prep, gate/ladder scripts, patches with mount map, image Dockerfiles, RoCE shim diffs and test (site identifiers replaced by placeholders; see `recipe/README.md`).
-- `docs/HF_MODEL_CARD.md` — the model card as uploaded; `docs/engram_hot90_README.md` — the hot-row files.
+- `docs/HF_MODEL_CARD.md` — the model card as uploaded.
 - `CREDITS.md`, `THIRD_PARTY_NOTICES.md` — who this stands on and under which licenses.
 
 ## Credits
