@@ -27,7 +27,7 @@ The shipped 510 GB checkpoint fits four GB10s only with the Engram tables on NVM
 | `engram_hot90_L01.safetensors`, `engram_hot90_L14.safetensors`, `engram_hot90_README.md` | **included**: Engram row ids sorted by corpus frequency (int64) with counts, the top 100 M row ids per table = **92.7 % of lookups on held-out text** (from hashing 1.1 B in-domain tokens with DeepSeek's `NgramHashState`, no forward needed; 106 M distinct rows were ever touched), for a resident hot set with disk for misses (see *Engram*) |
 
 <!-- BEST-SERVING-START -->
-## Best serving configuration so far (auto-updated 2026-09-11 02:08 Pacific)
+## Best serving configuration so far (auto-updated 2026-09-11 02:29 Pacific)
 Line A, row `exl3-ROCE-A` (accepted rung: ROCE=1). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8, b12x RoCE one-shot all-reduce = 1, async scheduling = 1.
 
 | | best so far |
@@ -51,6 +51,7 @@ Tuning ladder (accept = +3 % single-stream or 6-stream aggregate with ≤5 % pre
 | B | exl3-SERVE1M-B | MAXLEN=1000000 SEQS=8 | 59.9 | 184.9 | 1475 | ACCEPT |
 | B | exl3-G0-B | base | 61.5 | 185.6 | 1417 | base |
 | B | exl3-ROCE-B | ROCE=1 | 64.9 | 189.8 | 1436 | ACCEPT |
+| A | exl3-HOT-A | HOT_DIR=/mnt/glm52/dsv41engram/hot90 HOT_ROWS=20000000 | 63.63 | 198.07 | 1354.5 | reject |
 | B | exl3-ET64-B | ENGRAM_THREADS=64 | 62.22 | 176.68 | 1480.5 | reject |
 | B | exl3-HOT-B | HOT_DIR=/mnt/glm52/dsv41engram/hot90 HOT_ROWS=20000000 | 59.9 | 188.0 | 1424 | reject |
 <!-- BEST-SERVING-END -->
