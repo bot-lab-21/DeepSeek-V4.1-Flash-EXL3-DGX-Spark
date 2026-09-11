@@ -13,8 +13,8 @@ Weights: **[bot-lab-21/DeepSeek-V4.1-Flash-EXL3-3.5bpw-Pollard](https://huggingf
 This is not our model, our serving stack, or our quantizer. It is our measurements and the glue. See **Credits**.
 
 <!-- BEST-SERVING-START -->
-## Best serving configuration so far (auto-updated 2026-09-11 10:35 Pacific)
-Line A, row `exl3-ROCE-A` (accepted rung: ROCE=1). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8, b12x RoCE one-shot all-reduce = 1, async scheduling = 1, max context = 1000000, max concurrent seqs = 8, MAX_BATCHED = 16384.
+## Best serving configuration so far (auto-updated 2026-09-11 10:56 Pacific)
+Line A, row `exl3-ROCE-A` (accepted rung: ROCE=1). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8, b12x RoCE one-shot all-reduce = 1, async scheduling = 1, max context = 1000000, max concurrent seqs = 8, DISABLED_KERNELS = FlashInferCutedslMxfp8LinearKernel,FlashInferCutlassMxfp8LinearKernel,MarlinMxfp8LinearKernel.
 
 | | best so far |
 |---|---|
@@ -53,6 +53,7 @@ Tuning ladder (accept = +3 % single-stream or 6-stream aggregate with ≤5 % pre
 | B | exl3-NCCLBUF-B | NCCL_BUFFSIZE=1048576 NCCL_LL128_BUFFSIZE=262144 NCCL_PROTO=^LL128 | 63.4 | 193.67 | 1412.1 | reject |
 | B | exl3-NCCLBUF2-B | NCCL_BUFFSIZE=1048576 NCCL_LL128_BUFFSIZE=262144 | 61.68 | 182.41 | 1390.8 | reject |
 | B | exl3-WOPROJ-B | WOPROJ=1 | 65.03 | 185.91 | 1402.8 | reject |
+| B | exl3-KVGROUP-B | KVGROUP=fine | 60.92 | 177.68 | 1388.7 | reject |
 
 Levers in the served configurations and where they come from (full ledger in `CREDITS.md`):
 
@@ -61,7 +62,6 @@ Levers in the served configurations and where they come from (full ledger in `CR
 - NCCL channels 8 — lever from tenaiaiai's dsv41-flash-4x-dgx-spark-ja recipe (https://github.com/tenaiaiai/dsv41-flash-4x-dgx-spark-ja)
 - b12x one-shot RoCE all-reduce — Luke Alonso and the b12x contributors (https://github.com/local-inference-lab/b12x), vLLM shim ported from local-inference-lab/vllm
 - async scheduling — vLLM project
-- 16K max batched tokens for prefill — alexellis (glm-5.3-flash-4x-dgx-spark-switchless) and tonyd2wild (GLM-5.3-Flash-4x)
 - b12x MXFP8 dense GEMM kernel (`B12xMxfp8LinearKernel`, b12x by Luke Alonso and contributors) selected over the CUTLASS path — idea from MiaAI-Lab's DeepSeek-v4.1-Flash-DGX-Sparks write-up (SGLang), re-measured on our stack
 <!-- BEST-SERVING-END -->
 
