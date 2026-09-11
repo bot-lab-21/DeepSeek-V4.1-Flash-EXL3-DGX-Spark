@@ -6,4 +6,4 @@
 # ASYNC=1
 # MAXLEN=1000000
 # SEQS=8
-# MAX_BATCHED=16384
+# DISABLED_KERNELS=FlashInferCutedslMxfp8LinearKernel,FlashInferCutlassMxfp8LinearKernel,MarlinMxfp8LinearKernel

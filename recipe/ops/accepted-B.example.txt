@@ -5,3 +5,4 @@
 # MAXLEN=1000000
 # SEQS=8
 # ROCE=1
+# DISABLED_KERNELS=FlashInferCutedslMxfp8LinearKernel,FlashInferCutlassMxfp8LinearKernel,MarlinMxfp8LinearKernel

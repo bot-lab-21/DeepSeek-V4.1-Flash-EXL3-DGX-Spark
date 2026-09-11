@@ -82,8 +82,8 @@ Levers in the served configurations and where they come from (full ledger in `CR
 | MBPP+ (greedy) | — | TBD | pending |
 | needle at 219K tokens (2 keys) | — | — | PASS / PASS |
 | 1M-context serving row (pin + NCCL channels 8, `--max-model-len 1000000`) | 1M ctx: KV 1,078,380 tokens (boot 7) | — | C1 54.8 / 59.9, C4 141.8, C6 184.9, prefill 673 / 1007 / 1475 / 1449; **3.41 M tokens KV** |
-| **production (1M context), line A: pin + NCCL ch 8 + RoCE + async + 16K batch** | — | — | C1 58.4 / 65.1, C4 148.4, C6 183.1, TTFT 0.26, prefill 1312 / 1412 / 1411 / 1391; KV 2.99 M tokens |
-| **production (1M context), line B: pin + NCCL ch 8 + RoCE** | — | — | C1 55.5 / 61.8, C4 149.4, C6 192.7, TTFT 0.25, prefill 1343 / 1176 / 1459 / 1463; KV 3.41 M tokens |
+| **production (1M context), line A: pin + NCCL ch 8 + RoCE + async + b12x MXFP8 dense kernel** | — | — | C1 55.9 / 61.4, C4 147.2, C6 192.0, TTFT 0.25, prefill 1142 / 1326 / 1385 / 1406; KV 3.41 M tokens (11 Sep 11:36) |
+| **production (1M context), line B: pin + NCCL ch 8 + RoCE + b12x MXFP8 dense kernel** | — | — | C1 56.3 / 62.3, C4 149.6, C6 178.7, TTFT 0.25, prefill 1067 / 1174 / 1396 / 1418; KV 3.41 M tokens (11 Sep 11:15). Run-to-run spread on this fleet is about ±5 %: the same config benched C6 192.7 two hours earlier |
 | **optional KV grouping fix** (`recipe/patches/kvgroup`, env `DSV41_KV_GROUPING=fine`) | — | — | KV 3.41 M → **5.57 M tokens at 1M** (+63 %) for −6 % single-stream / −8 % C6 (47 KV groups of scheduler work); off in our served bases |
 
 Engram: the top 100 M rows of each n-gram table (by frequency over 1.12 B tokens of real assistant traffic) cover **92.7 %** of held-out lookups (43 % at 1 M, 74 % at 20 M). Quantizing Engram rows to fp4 (mxfp4 or nvfp4) was NLL-neutral within noise. A 20 M-row resident set (CPU hit/miss split) measured −4 to −6 % single-stream on both lines, so the ids are not shipped; a GPU-side gather is the open follow-up.
