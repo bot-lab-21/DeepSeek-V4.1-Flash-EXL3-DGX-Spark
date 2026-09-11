@@ -24,7 +24,10 @@ This is not our model, our serving stack, or our quantizer. It is our measuremen
 | 6 streams aggregate tok/s | 131.86 | 130.7 | 178.7 |
 | cold prefill 3K / 12K / 47K / 93K tok/s | 902 / 1026 / 1539 / 1194 | 1094 / 558 / 1310 / 1292 | 1263 / 1082 / 1363 / 1375 |
 | KV capacity at gmu 0.80 | 1,078,380 tokens (boot 7, 1M ctx) | 6.99 GiB/rank = 1.16 M tokens | 2.56 M tokens |
-| ppl probe (24 held-out texts), HumanEval+ / MBPP+ | — | TBD | TBD |
+| ppl probe (6 held-out texts, 4,210 tokens) | — | TBD (pending) | 4.043 |
+| HumanEval / HumanEval+ pass@1 (greedy, evalplus) | — | TBD (pending) | 0.951 / 0.921 |
+| MBPP+ (greedy) | — | TBD | pending |
+| needle at 219K tokens (2 keys) | — | — | PASS / PASS |
 
 Engram: the top 100 M rows of each n-gram table (by frequency over 1.12 B tokens of real assistant traffic) cover **92.7 %** of held-out lookups (43 % at 1 M, 74 % at 20 M). Quantizing Engram rows to fp4 (mxfp4 or nvfp4) was NLL-neutral within noise. The ids are published with the weights; the serving patch can keep them resident.
 

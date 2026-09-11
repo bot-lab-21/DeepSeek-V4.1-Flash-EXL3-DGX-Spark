@@ -42,8 +42,10 @@ The per-matrix weight relative error at K=3 is 0.167 and the output does not mov
 | 6 streams aggregate tok/s | 131.86 | 130.7 | 178.7 |
 | cold prefill 3K / 12K / 47K / 93K tok/s | 902 / 1026 / 1539 / 1194 | 1094 / 558 / 1310 / 1292 | 1263 / 1082 / 1363 / 1375 |
 | KV capacity at gmu 0.80 | 1,078,380 tokens (boot 7, 1M ctx) | 1.16 M tokens | 2.56 M tokens |
-| ppl probe (24 held-out texts) | — | TBD | TBD |
-| HumanEval+ / MBPP+ (greedy) | — | TBD | TBD |
+| ppl probe (6 held-out texts, 4,210 tokens) | — | TBD (pending) | 4.043 |
+| HumanEval / HumanEval+ pass@1 (greedy, evalplus) | — | TBD (pending) | 0.951 / 0.921 |
+| MBPP+ (greedy) | — | TBD | pending (battery timed out mid-run; re-running) |
+| needle at 219K tokens (2 keys) | — | — | PASS / PASS |
 | needle 300K, tool-call integrity, image probe | TBD | TBD |
 
 ## How it was made (Pollard-method, "route B")
