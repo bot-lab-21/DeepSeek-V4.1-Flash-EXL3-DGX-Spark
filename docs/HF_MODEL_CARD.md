@@ -41,7 +41,7 @@ The per-matrix weight relative error at K=3 is 0.167 and the output does not mov
 | 4 streams aggregate tok/s | 102.7 | 133.1 |
 | 6 streams aggregate tok/s | 130.7 | 178.7 |
 | cold prefill 3K / 12K / 47K / 93K tok/s | 1094 / 558 / 1310 / 1292 | 1263 / 1082 / 1363 / 1375 |
-| KV capacity at gmu 0.80 | 1.16 M tokens | TBD |
+| KV capacity at gmu 0.80 | 1.16 M tokens | 2.56 M tokens |
 | ppl probe (24 held-out texts) | TBD | TBD |
 | HumanEval+ / MBPP+ (greedy) | TBD | TBD |
 | needle 300K, tool-call integrity, image probe | TBD | TBD |
