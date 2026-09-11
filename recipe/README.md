@@ -25,6 +25,7 @@ Everything here is the actual tooling we run, with site identifiers replaced by 
 | `patches/mounts.txt` | which files are bind-mounted over the vehicle image (`<local file> <path under site-packages/vllm>`; `../cuda_exl3/config.py` for the plugin) |
 | `patches/engram.py` | tonyd2wild's Engram-on-NVMe module + our P6 resident hot rows (`DSV41_ENGRAM_HOT_DIR/ROWS`, inert unless set) |
 | `patches/exl3_config.py` | cuda-exl3 1.0.3 `config.py` + the worker-side model-path fallback needed for DSpark drafters (see recipe doc) |
+| `patches/exl3_moe.py` | cuda-exl3 1.0.3 `moe.py` + uneven 128-aligned TP split of the expert intermediate dim (V4.1-Flash: 2304/4 = 576 is not a multiple of the kernel block; ranks get 512/640/640/512) |
 | `patches/test_*.py` | in-image smoke tests for the two patches |
 | `images/Dockerfile.overlay6/7/8` | vehicle image chain: tonyd2wild overlay5 → + RoCE/PCIe one-shot all-reduce shim (b12x) → + cuda-exl3 with the V4.1 overlay → + spin-wait fix |
 | `roce_port/*.diff`, `roce_ar_*.{py,sh}` | the vLLM shim diffs for the b12x one-shot collectives and the 2-node bit-exactness / latency test |

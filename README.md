@@ -38,7 +38,8 @@ Exact bf16 upscale of the MXFP4 checkpoint → DeepSeek's reference forward over
 ## Two things you will hit
 
 1. **cuda-exl3 + a DSpark drafter:** the plugin finds the standalone `quantization_config.json` through a hint set only in the main process; the drafter's quant config is rebuilt in the spawned worker and fails with "could not find tensor_storage". `recipe/patches/exl3_config.py` adds an env fallback (`CUDA_EXL3_MODEL_PATH`).
-2. **Memory gates drift:** vLLM refuses to start a rank when free memory at its init snapshot is below `gmu × total`; a check minutes earlier is not enough on unified memory. `recipe/dsv41_tp4_launch.sh` gates every rank right before `docker run` (probe → drop caches → re-probe → fail loudly).
+2. **EXL3 MoE kernel block width:** `exl3_moe_gemm` needs each per-rank shard of the expert intermediate dim to be a multiple of 128; this model has 2304 → 576 per rank at TP4. `recipe/patches/exl3_moe.py` splits the dim unevenly on 128-column boundaries (512/640/640/512) — the TP reduction does not care.
+3. **Memory gates drift:** vLLM refuses to start a rank when free memory at its init snapshot is below `gmu × total`; a check minutes earlier is not enough on unified memory. `recipe/dsv41_tp4_launch.sh` gates every rank right before `docker run` (probe → drop caches → re-probe → fail loudly).
 
 ## Layout
 
