@@ -83,3 +83,22 @@ line, winners cross-applied, base re-measured at every hand-off (`ops/stack_next
 | B4.9 | Node identity: firmware/driver/kernel must match across ranks (a mismatched rank silently bottlenecks the head) | checked 01:35: UEFI 0x516 / 0x2009b0b / EC 0x3000508, driver 580.173.02, kernel 6.17.0-1029 on all 8 ✓ | tonyd2wild TROUBLESHOOTING | +140 % prefill when fixed | HAVE (verified) |
 | B4.10 | zram: 1.8–3.7 GB swapped on every serving node (swappiness 1) → memory tightness signal; `vfs_cache_pressure=10000` is extreme (→100) | watch; consider `vm.swappiness=0` on serving nodes | memory-creep forum thread | — | note; FLUSH8 + pin discipline first |
 | B4.11 | Clock cap 2100 for hard-off units costs −1 % decode; EC clock-latch fix = AC-cut power cycle | have on sp1/sp2 | forums 370304/376239/379389, ShiningMeUp, agjs | — | HAVE; burn gate added (B1.1) |
+
+### B5. From MiaAI-Lab/DeepSeek-v4.1-Flash-DGX-Sparks (SGLang, TP3/EP3 on 3 Sparks; AGPL-3.0 → ideas only, credit on adoption; checked 2026-09-11)
+| # | lever | setting | their effect | us |
+|---|---|---|---|---|
+| B5.1 | **NCCL connection buffers in pinned host RAM = GPU memory on GB10** | `NCCL_BUFFSIZE=1048576 NCCL_LL128_BUFFSIZE=262144 NCCL_PROTO=^LL128 NCCL_MAX_NCHANNELS=8` | 4.7 GiB → 0.14 GiB pinned per node; ended their boot-time "KV lottery" | **= our lever A1 exactly** (non-torch 4–12 GiB/rank). Add BUFFSIZE/LL128/PROTO knobs to the launcher; measure non-torch before/after → raise the KV pin |
+| B5.2 | FP8 dense projections routed to FlashInfer's b12x warp-level MXFP8 kernel (32×32 ue8m0 blocks fall to Triton otherwise) | `--fp8-gemm-backend flashinfer_*` + adapter | dense GEMMs 52 → 17 ms per step (of 118 → 82 total) | **CHECK what vLLM uses for the 32×32-block FP8 dense on SM121** (profile one step); if Triton/CUTLASS, a b12x route is a large lever |
+| B5.3 | `wo_a` einsum bf16 fallback + lm_head bf16 ≈ 13 ms/step | — | no FP8 kernel on SM121 | check our step profile for the same |
+| B5.4 | KV bytes/token: 1,670.75 B/token/rank (only the 4 `kv_source` layers store KV) → 1M tokens = 1.67 GB | SGLang accounting | 750K pool in ~1.3 GB | **our vLLM pool: 12 GiB → 2.56 M tokens ≈ 4.7 KB/token** — 2.8× theirs. Investigate vLLM's KV group accounting for the encoder/decoder KV-sharing layers (+ indexer pages, block 128); ties to B2.5 |
+| B5.5 | `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` → NaN logits for prefills > 64 tokens on their stack | never set it | — | we don't set it; keep it that way |
+| B5.6 | Engram: O_DIRECT 4 KiB reads, 96 IO threads, row cache 0 ("~0 % reuse") | `DSV41_IO_THREADS=96 DSV41_CACHE_GIB=0` | 1–3 ms/step | consistent with our HOT result (resident rows didn't pay) |
+
+### C. Found on our own stack 2026-09-11 (kernel + KV accounting)
+| # | lever | status |
+|---|---|---|
+| C1 | B12XLIN — force `B12xMxfp8LinearKernel` for MXFP8 dense linears (cutlass 3× slower at decode M) | row running on B |
+| C2 | WOPROJ — b12x fused `wo_projection` for `_o_proj` (wo_a was bf16 emulation); patches/woproj | unit-tested 6–9× at M=6; served row + quality battery queued on B |
+| C3 | KVGROUP — vLLM KV grouping heuristic (`DSV41_KV_GROUPING=fine`): +63 % tokens @1M, +43 % @300K (simulated) | patch being drafted (patches/kvgroup) |
+| C4 | in-flight reservation: async + 16K batched costs −12 % KV → on A drop MAXB16K (or keep 8K batched with async) | apply at next A re-base |
+| C5 | MAXB16K accepted on A (+4.6 % C6) but rejected on B (−0.7 %) and costs KV → treat as neutral; prefer KV | decide with C4 |
