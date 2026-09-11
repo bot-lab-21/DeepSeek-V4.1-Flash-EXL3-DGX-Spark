@@ -27,7 +27,7 @@ The shipped 510 GB checkpoint fits four GB10s only with the Engram tables on NVM
 | `engram_hot90_L01.safetensors`, `engram_hot90_L14.safetensors`, `engram_hot90_README.md` | **included**: Engram row ids sorted by corpus frequency (int64) with counts, the top 100 M row ids per table = **92.7 % of lookups on held-out text** (from hashing 1.1 B in-domain tokens with DeepSeek's `NgramHashState`, no forward needed; 106 M distinct rows were ever touched), for a resident hot set with disk for misses (see *Engram*) |
 
 <!-- BEST-SERVING-START -->
-## Best serving configuration so far (auto-updated 2026-09-11 02:50 Pacific)
+## Best serving configuration so far (auto-updated 2026-09-11 03:02 Pacific)
 Line A, row `exl3-ROCE-A` (accepted rung: ROCE=1). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8, b12x RoCE one-shot all-reduce = 1, async scheduling = 1, max context = 1000000, max concurrent seqs = 8.
 
 | | best so far |
