@@ -13,7 +13,7 @@ Weights: **[bot-lab-21/DeepSeek-V4.1-Flash-EXL3-3.5bpw-Pollard](https://huggingf
 This is not our model, our serving stack, or our quantizer. It is our measurements and the glue. See **Credits**.
 
 <!-- BEST-SERVING-START -->
-## Best serving configuration so far (auto-updated 2026-09-11 09:10 Pacific)
+## Best serving configuration so far (auto-updated 2026-09-11 09:32 Pacific)
 Line A, row `exl3-ROCE-A` (accepted rung: ROCE=1). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8, b12x RoCE one-shot all-reduce = 1, async scheduling = 1, max context = 1000000, max concurrent seqs = 8, MAX_BATCHED = 16384.
 
 | | best so far |
@@ -42,6 +42,7 @@ Tuning ladder (accept = +3 % single-stream or 6-stream aggregate with ≤5 % pre
 | B | exl3-ROCE-B | ROCE=1 | 64.9 | 189.8 | 1436 | ACCEPT |
 | B | exl3-G0-B-base09110837 | base | 65.2 | 185.1 | 1452 | base |
 | B | exl3-G0-B | base | 64.9 | 185.6 | 1413 | base |
+| B | exl3-B12XLIN-B | DISABLED_KERNELS=FlashInferCutedslMxfp8LinearKernel,FlashInferCutlassMxfp8LinearKernel,MarlinMxfp8LinearKernel | 65.0 | 192.5 | 1406 | ACCEPT |
 | A | exl3-HOT-A | HOT_DIR=/mnt/glm52/dsv41engram/hot90 HOT_ROWS=20000000 | 63.63 | 198.07 | 1354.5 | reject |
 | A | exl3-FLUSH8-A | FLUSH_GIB=8 | 64.83 | 181.74 | 1422.5 | reject |
 | A | exl3-NTH256-A | NCCL_NTHREADS=256 | 63.95 | 184.97 | 1416.9 | reject |
@@ -58,6 +59,7 @@ Levers in the served configurations and where they come from (full ledger in `CR
 - b12x one-shot RoCE all-reduce — Luke Alonso and the b12x contributors (https://github.com/local-inference-lab/b12x), vLLM shim ported from local-inference-lab/vllm
 - async scheduling — vLLM project
 - 16K max batched tokens for prefill — alexellis (glm-5.3-flash-4x-dgx-spark-switchless) and tonyd2wild (GLM-5.3-Flash-4x)
+- b12x MXFP8 dense GEMM kernel (`B12xMxfp8LinearKernel`, b12x by Luke Alonso and contributors) selected over the CUTLASS path — idea from MiaAI-Lab's DeepSeek-v4.1-Flash-DGX-Sparks write-up (SGLang), re-measured on our stack
 <!-- BEST-SERVING-END -->
 
 ## Results
