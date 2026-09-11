@@ -1,0 +1,9 @@
+# Pinned BASE carried into every ladder rung (ops/accepted-<LINE>.env in our tree). Not a lever.
+# Why: vLLM sizes the KV cache from worker 0's profiled headroom only (v1 core: available_gpu_memory[0]); with the uneven
+# 128-aligned TP split the 640-column ranks hold ~12 GiB more expert bytes than the head, so the head's figure overcommits them.
+# Pin KV to fit the heaviest rank with ~5 GiB physical headroom; GMU then only acts as vLLM's startup guard; MEM_MIN_GIB is the
+# launcher's absolute MemFree floor right before docker run (the container's own startup consumes ~17 GiB of unified memory
+# before vLLM's init snapshot).
+KV_BYTES=12884901888
+GMU=0.78
+MEM_MIN_GIB=113

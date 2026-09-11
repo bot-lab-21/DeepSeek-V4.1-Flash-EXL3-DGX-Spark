@@ -32,9 +32,9 @@ test -f "$MODEL_HOST/model-00048-of-00048.safetensors" || { echo "MODEL INCOMPLE
 # --- per-rank MEMORY GATE (user 2026-09-10: "they should all have a mem gate in launch recipe"). vLLM's worker refuses to start when
 # CUDA-free < GMU*total at its init snapshot (sp7 died at 96.08 < 97.35 GiB minutes after prep had seen 110). CUDA-free on GB10 ≈ MemFree
 # (probe 114.1 vs MemFree 114.6), so gate on MemFree >= GMU*total + MEM_MARGIN_GIB right before docker run; drop caches and retry; never lower GMU.
-MEM_MARGIN_GIB="${MEM_MARGIN_GIB:-4}"
+MEM_MARGIN_GIB="${MEM_MARGIN_GIB:-4}"; MEM_MIN_GIB="${MEM_MIN_GIB:-0}"   # MEM_MIN_GIB: absolute MemFree floor (GiB) when KV is pinned and GMU is only vLLM's startup guard
 pgrep -f "bash /tmp/cache_flusher.sh" >/dev/null 2>&1 || { [ -x /tmp/cache_flusher.sh ] && (setsid nohup bash /tmp/cache_flusher.sh >> /tmp/cache_flusher.log 2>&1 < /dev/null &) || true; }
-mem_gate(){ awk -v g="$GMU" -v m="$MEM_MARGIN_GIB" '/^MemFree:/{f=$2/1048576} /^MemTotal:/{t=$2/1048576} END{need=g*t+m; printf "%.1f %.1f %.1f %d\n", f, t, need, (f>=need)}' /proc/meminfo; }
+mem_gate(){ awk -v g="$GMU" -v m="$MEM_MARGIN_GIB" -v a="$MEM_MIN_GIB" '/^MemFree:/{f=$2/1048576} /^MemTotal:/{t=$2/1048576} END{need=g*t+m; if (a+0>need) need=a+0; printf "%.1f %.1f %.1f %d\n", f, t, need, (f>=need)}' /proc/meminfo; }
 for attempt in 1 2 3 4; do read -r MF MT MNEED MOK <<<"$(mem_gate)"; [ "$MOK" = 1 ] && break
   echo "MEM-GATE rank $NODE_RANK attempt $attempt: MemFree $MF GiB < need $MNEED (gmu $GMU*$MT + margin $MEM_MARGIN_GIB) → dropping caches"
   sync; sudo -n /usr/local/bin/glm-drop-caches >/dev/null 2>&1 || echo 3 | sudo -n tee /proc/sys/vm/drop_caches >/dev/null 2>&1 || true; sleep 3; done
