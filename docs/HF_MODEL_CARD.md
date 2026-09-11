@@ -27,7 +27,7 @@ The shipped 510 GB checkpoint fits four GB10s only with the Engram tables on NVM
 | `engram_hot90_L01.safetensors`, `engram_hot90_L14.safetensors`, `engram_hot90_README.md` | **included**: Engram row ids sorted by corpus frequency (int64) with counts, the top 100 M row ids per table = **92.7 % of lookups on held-out text** (from hashing 1.1 B in-domain tokens with DeepSeek's `NgramHashState`, no forward needed; 106 M distinct rows were ever touched), for a resident hot set with disk for misses (see *Engram*) |
 
 <!-- BEST-SERVING-START -->
-## Best serving configuration so far (auto-updated 2026-09-11 00:58 Pacific)
+## Best serving configuration so far (auto-updated 2026-09-11 01:16 Pacific)
 Line B, row `exl3-CH8-B` (accepted rung: NCCL_CH=8). Settings on top of the recipe defaults: KV cache pinned = 12884901888, gpu-memory-utilization = 0.78, launcher MemFree floor (GiB) = 113, NCCL channels = 8.
 
 | | best so far |
@@ -43,6 +43,7 @@ Tuning ladder (accept = +3 % single-stream or 6-stream aggregate with ≤5 % pre
 | line | row | lever | C1/stream | C6 agg | prefill@47K | verdict |
 |---|---|---|---|---|---|---|
 | A | exl3-G0-A-base0052 | base | 61.1 | 178.7 | 1363 | base |
+| A | exl3-G0-A | base | 62.5 | 193.4 | 1440 | base |
 | B | exl3-G0-B | base | 61.2 | 178.6 | 1323 | base |
 | B | exl3-CH8-B | NCCL_CH=8 | 62.2 | 199.0 | 1423 | ACCEPT |
 | B | exl3-ET64-B | ENGRAM_THREADS=64 | 62.22 | 176.68 | 1480.5 | reject |
